@@ -1,0 +1,17 @@
+{
+  "name": "client",
+  "version": "1.0.0",
+  "description": "",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {},
+  "dependencies": {
+    "ethereumjs-util": "^5.1.2",
+    "express": "^4.15.3",
+    "request": "^2.81.0",
+    "web3": "^0.19.0"
+  }
+}
