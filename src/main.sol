@@ -88,14 +88,6 @@ contract PrimasToken is ERC20Token {
 
     function doTransfer(address _from, address _to, uint _value) internal returns (bool success) {
         if (!transfersEnabled) throw;
-
-        if (_from == initialOwner) {
-            if ((balance[_from] - _value) <= 4900) {
-                // 冻结
-                return false;
-            }
-        }
-        
         if (balance[_from] >= _value && balance[_to] + _value >= balance[_to]) {
             balance[_from] -= _value;
             balance[_to] += _value;
