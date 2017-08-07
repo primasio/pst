@@ -68,7 +68,7 @@ contract PrimasToken is ERC20Token {
         if (!transfersEnabled) throw;
 
         Transfer(msg.sender, _to, _value);
-
+        
         return doTransfer(msg.sender, _to, _value);
     }
 
@@ -77,9 +77,10 @@ contract PrimasToken is ERC20Token {
         if (!transfersEnabled) throw;
 
         if (m_allowance[_from][msg.sender] < _value) return false;
-
+        
+        m_allowance[_from][msg.sender] -= _value;
+        
         if (doTransfer(_from, _to, _value)) {
-            m_allowance[_from][msg.sender] -= _value;
             return true;
         } else {
             return false;
