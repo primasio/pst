@@ -1,4 +1,4 @@
-pragma solidity ^0.4.11;
+pragma solidity ^0.4.14;
 
 
 // https://github.com/ethereum/wiki/wiki/Standardized_Contract_APIs#transferable-fungibles-see-erc-20-for-the-latest
@@ -65,7 +65,7 @@ contract PrimasToken is ERC20Token {
     }
 
     function transfer(address _to, uint256 _value) returns (bool success) {
-        if (!transfersEnabled) throw;
+        if (!transfersEnabled) revert();
 
         Transfer(msg.sender, _to, _value);
         
@@ -73,10 +73,10 @@ contract PrimasToken is ERC20Token {
     }
 
     function transferFrom(address _from, address _to, uint256 _value) returns (bool) {
-        if (msg.sender != initialOwner) throw;
-        if (!transfersEnabled) throw;
+        // if (msg.sender != initialOwner) revert();
+        if (!transfersEnabled) revert();
 
-        if (m_allowance[_from][msg.sender] < _value) return false;
+        if (allowance(_from, msg.sender) < _value) return false;
         
         m_allowance[_from][msg.sender] -= _value;
         
@@ -88,7 +88,7 @@ contract PrimasToken is ERC20Token {
     }
 
     function doTransfer(address _from, address _to, uint _value) internal returns (bool success) {
-        if (!transfersEnabled) throw;
+        if (!transfersEnabled) revert();
         if (balance[_from] >= _value && balance[_to] + _value >= balance[_to]) {
             balance[_from] -= _value;
             balance[_to] += _value;
@@ -100,10 +100,10 @@ contract PrimasToken is ERC20Token {
     }
     
     function approve(address _spender, uint256 _value) returns (bool success) {
-        if (!transfersEnabled) throw;
+        if (!transfersEnabled) revert();
 
         // https://github.com/ethereum/EIPs/issues/20#issuecomment-263524729
-        if ( (_value != 0) && (m_allowance[msg.sender][_spender] != 0) ) throw;
+        if ( (_value != 0) && (allowance(msg.sender, _spender) != 0) ) revert();
         
         m_allowance[msg.sender][_spender] = _value;
 
@@ -113,13 +113,13 @@ contract PrimasToken is ERC20Token {
     }
     
     function allowance(address _owner, address _spender) constant returns (uint256) {
-        if (!transfersEnabled) throw;
+        if (!transfersEnabled) revert();
 
         return m_allowance[_owner][_spender];
     }
     
     function enableTransfers(bool _transfersEnabled) constant returns (bool) {
-        if (msg.sender != initialOwner) throw;
+        if (msg.sender != initialOwner) revert();
         transfersEnabled = _transfersEnabled;
         return transfersEnabled;
     }
