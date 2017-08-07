@@ -27,6 +27,7 @@ function range (start, stop, step) {
     return range;
 }
 
+
 function Duration() {
     this.stime = new Date();
 }
@@ -35,5 +36,4 @@ Duration.prototype.elapsed = function (){
     return new Date().getTime() - this.stime;
 };
 
-// export default {assert, range};
 module.exports = {'assert': assert, 'range': range, 'Duration': Duration};
