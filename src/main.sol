@@ -65,6 +65,9 @@ contract PrimasToken is ERC20Token {
     }
 
     function transfer(address _to, uint256 _value) returns (bool success) {
+        // `revert()` | `throw`
+        //      http://solidity.readthedocs.io/en/develop/control-structures.html#error-handling-assert-require-revert-and-exceptions
+        //      https://ethereum.stackexchange.com/questions/20978/why-do-throw-and-revert-create-different-bytecodes/20981
         if (!transfersEnabled) revert();
 
         Transfer(msg.sender, _to, _value);
