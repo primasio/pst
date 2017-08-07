@@ -38,7 +38,7 @@ contract PrimasToken is ERC20Token {
     address public initialOwner;
     uint256 public supply   = 100000000;  // 100, 000, 000
     string  public name     = 'Primas';
-    uint8   public decimals = 0;
+    uint8   public decimals = 3;
     string  public symbol   = 'PST';
     string  public version  = 'v0.1';
     bool    public transfersEnabled = true;
@@ -69,25 +69,19 @@ contract PrimasToken is ERC20Token {
         //      http://solidity.readthedocs.io/en/develop/control-structures.html#error-handling-assert-require-revert-and-exceptions
         //      https://ethereum.stackexchange.com/questions/20978/why-do-throw-and-revert-create-different-bytecodes/20981
         if (!transfersEnabled) revert();
-
-        Transfer(msg.sender, _to, _value);
         
         return doTransfer(msg.sender, _to, _value);
     }
 
     function transferFrom(address _from, address _to, uint256 _value) returns (bool) {
-        // if (msg.sender != initialOwner) revert();
+
         if (!transfersEnabled) revert();
 
         if (allowance(_from, msg.sender) < _value) return false;
         
         m_allowance[_from][msg.sender] -= _value;
         
-        if (doTransfer(_from, _to, _value)) {
-            return true;
-        } else {
-            return false;
-        }
+        return doTransfer(_from, _to, _value);
     }
 
     function doTransfer(address _from, address _to, uint _value) internal returns (bool success) {
