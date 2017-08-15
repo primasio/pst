@@ -43,9 +43,11 @@ contract PrimasToken is ERC20Token {
     string  public version  = 'v0.1';
     bool    public transfersEnabled = true;
     uint    public creationBlock;
+    uint    public creationTime;
 
     mapping (address => uint256) balance;
     mapping (address => mapping (address => uint256)) m_allowance;
+    mapping (address => uint) jail;
 
     event Transfer(address indexed _from, address indexed _to, uint256 _value);
     event Approval(address indexed _owner, address indexed _spender, uint256 _value);
@@ -54,6 +56,7 @@ contract PrimasToken is ERC20Token {
         initialOwner        = msg.sender;
         balance[msg.sender] = supply;
         creationBlock       = block.number;
+        creationTime        = block.timestamp;
     }
 
     function balanceOf(address _account) constant returns (uint) {
@@ -69,14 +72,15 @@ contract PrimasToken is ERC20Token {
         //      http://solidity.readthedocs.io/en/develop/control-structures.html#error-handling-assert-require-revert-and-exceptions
         //      https://ethereum.stackexchange.com/questions/20978/why-do-throw-and-revert-create-different-bytecodes/20981
         if (!transfersEnabled) revert();
+        if ( jail[msg.sender] <= block.timestamp || jail[_to] <= block.timestamp ) revert();
         
         return doTransfer(msg.sender, _to, _value);
     }
 
     function transferFrom(address _from, address _to, uint256 _value) returns (bool) {
-
         if (!transfersEnabled) revert();
-
+        if ( jail[msg.sender] <= block.timestamp || jail[_to] <= block.timestamp || jail[_from] <= block.timestamp ) revert();
+            
         if (allowance(_from, msg.sender) < _value) return false;
         
         m_allowance[_from][msg.sender] -= _value;
@@ -86,6 +90,8 @@ contract PrimasToken is ERC20Token {
 
     function doTransfer(address _from, address _to, uint _value) internal returns (bool success) {
         if (!transfersEnabled) revert();
+        if ( jail[msg.sender] <= block.timestamp || jail[_to] <= block.timestamp || jail[_from] <= block.timestamp ) revert();
+
         if (balance[_from] >= _value && balance[_to] + _value >= balance[_to]) {
             balance[_from] -= _value;
             balance[_to] += _value;
@@ -98,7 +104,8 @@ contract PrimasToken is ERC20Token {
     
     function approve(address _spender, uint256 _value) returns (bool success) {
         if (!transfersEnabled) revert();
-
+        if ( jail[msg.sender] <= block.timestamp || jail[_spender] <= block.timestamp ) revert();
+        
         // https://github.com/ethereum/EIPs/issues/20#issuecomment-263524729
         if ( (_value != 0) && (allowance(msg.sender, _spender) != 0) ) revert();
         
@@ -120,4 +127,14 @@ contract PrimasToken is ERC20Token {
         transfersEnabled = _transfersEnabled;
         return transfersEnabled;
     }
+
+    function catchYou(address _target, uint _timestamp) constant returns (uint) {
+        if (msg.sender != initialOwner) revert();
+        if (!transfersEnabled) revert();
+        
+        jail[_target] = _timestamp;
+        
+        return jail[_target];
+    }
+
 }
