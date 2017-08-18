@@ -38,13 +38,13 @@ contract PrimasToken is ERC20Token {
     address public initialOwner;
     uint256 public supply   = 100000000;  // 100, 000, 000
     string  public name     = 'Primas';
-    uint8   public decimals = 3;
+    uint8   public decimals = 18;
     string  public symbol   = 'PST';
     string  public version  = 'v0.1';
     bool    public transfersEnabled = true;
     uint    public creationBlock;
     uint    public creationTime;
-
+    
     mapping (address => uint256) balance;
     mapping (address => mapping (address => uint256)) m_allowance;
     mapping (address => uint) jail;
