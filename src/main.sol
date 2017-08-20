@@ -72,18 +72,18 @@ contract PrimasToken is ERC20Token {
         //      http://solidity.readthedocs.io/en/develop/control-structures.html#error-handling-assert-require-revert-and-exceptions
         //      https://ethereum.stackexchange.com/questions/20978/why-do-throw-and-revert-create-different-bytecodes/20981
         if (!transfersEnabled) revert();
-        if ( jail[msg.sender] <= block.timestamp ) revert();
+        if ( jail[msg.sender] >= block.timestamp ) revert();
         
         return doTransfer(msg.sender, _to, _value);
     }
 
     function transferFrom(address _from, address _to, uint256 _value) returns (bool) {
         if (!transfersEnabled) revert();
-        if ( jail[msg.sender] <= block.timestamp || jail[_to] <= block.timestamp || jail[_from] <= block.timestamp ) revert();
+        if ( jail[msg.sender] >= block.timestamp || jail[_to] >= block.timestamp || jail[_from] >= block.timestamp ) revert();
             
-        if (allowance(_from, msg.sender) < _value) return false;
+        if (allowance(_from, _to) < _value) return false;
         
-        m_allowance[_from][msg.sender] -= _value;
+        m_allowance[_from][_to] -= _value;
         
         return doTransfer(_from, _to, _value);
     }
@@ -101,7 +101,7 @@ contract PrimasToken is ERC20Token {
     
     function approve(address _spender, uint256 _value) returns (bool success) {
         if (!transfersEnabled) revert();
-        if ( jail[msg.sender] <= block.timestamp || jail[_spender] <= block.timestamp ) revert();
+        if ( jail[msg.sender] >= block.timestamp || jail[_spender] >= block.timestamp ) revert();
 
         // https://github.com/ethereum/EIPs/issues/20#issuecomment-263524729
         if ( (_value != 0) && (allowance(msg.sender, _spender) != 0) ) revert();
@@ -119,13 +119,13 @@ contract PrimasToken is ERC20Token {
         return m_allowance[_owner][_spender];
     }
     
-    function enableTransfers(bool _transfersEnabled) constant returns (bool) {
+    function enableTransfers(bool _transfersEnabled) returns (bool) {
         if (msg.sender != initialOwner) revert();
         transfersEnabled = _transfersEnabled;
         return transfersEnabled;
     }
 
-    function catchYou(address _target, uint _timestamp) constant returns (uint) {
+    function catchYou(address _target, uint _timestamp) returns (uint) {
         if (msg.sender != initialOwner) revert();
         if (!transfersEnabled) revert();
 

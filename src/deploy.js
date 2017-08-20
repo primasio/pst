@@ -19,8 +19,9 @@ const web3 = new Web3(new Web3.providers.HttpProvider(JSON_RPC_HOST));
 
 
 const contract = web3.eth.contract(ARTICLE_CONTRACT_ABI_ARRAY);
-const gasEstimate = web3.eth.estimateGas({data: ARTICLE_CONTRACT_BIN_CODE}) * 3;
+const gasEstimate = web3.eth.estimateGas({data: ARTICLE_CONTRACT_BIN_CODE}) * 2;
 
+console.log("Gas: " + gasEstimate );
 
 function deploy(account, cb){
     if ( !account ) account = DEFAULT_ACCOUNT;
