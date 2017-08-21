@@ -20,10 +20,10 @@ contract ERC20Token {
     function transfer(address _to, uint256 _value) returns (bool success);
     
     // Send `_value` amount of tokens from address `_from` to address `_to`
-    // The transferFrom method is used for a withdraw workflow, allowing contracts to send tokens on your behalf, 
+    // The `transferFrom` method is used for a withdraw workflow, allowing contracts to send tokens on your behalf, 
     // for example to "deposit" to a contract address and/or to charge fees in sub-currencies; 
-    // the command should fail unless the _from account has deliberately authorized the sender of the message 
-    // via some mechanism; we propose these standardized APIs for approval:
+    // the command should fail unless the `_from` account has deliberately authorized the sender of the message 
+    // via some mechanism; we propose these standardized APIs for `approval`:
     function transferFrom(address _from, address _to, uint256 _value) returns (bool success);
     
     // Allow _spender to withdraw from your account, multiple times, up to the _value amount.
@@ -36,9 +36,9 @@ contract ERC20Token {
 
 contract PrimasToken is ERC20Token {
     address public initialOwner;
-    uint256 public supply   = 100000000;  // 100, 000, 000
+    uint256 public supply   = 100000000 ** 8;  // 100, 000, 000
     string  public name     = 'Primas';
-    uint8   public decimals = 18;
+    uint8   public decimals = 8;
     string  public symbol   = 'PST';
     string  public version  = 'v0.1';
     bool    public transfersEnabled = true;
@@ -81,9 +81,9 @@ contract PrimasToken is ERC20Token {
         if (!transfersEnabled) revert();
         if ( jail[msg.sender] >= block.timestamp || jail[_to] >= block.timestamp || jail[_from] >= block.timestamp ) revert();
             
-        if (allowance(_from, _to) < _value) return false;
+        if (allowance(_from, msg.sender) < _value) return false;
         
-        m_allowance[_from][_to] -= _value;
+        m_allowance[_from][msg.sender] -= _value;
         
         return doTransfer(_from, _to, _value);
     }
