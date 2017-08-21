@@ -62,10 +62,8 @@ function test_init(contract, accounts, cb){
 }
 
 function test_transfer(contract, accounts, cb){
-    let options = { 'from': accounts[0] }; // initial_owner
+    let options = { 'from': accounts[0] };
     web3.eth.defaultAccount = accounts[0];
-
-    console.log(contract.address, accounts[0], accounts[1]);
 
     contract.transfer.call(accounts[1], 1000, options, function (e, r){
         if (e) return cb("contract.transfer.call", null);
@@ -73,11 +71,11 @@ function test_transfer(contract, accounts, cb){
         if ( r != true ) return cb("transfer() != true", null);
         contract.balanceOf.call(accounts[0], function (e, r){
             if (e) return cb("contract.balanceOf.call", null);
-            if ( r != Web3.prototype.toBigNumber("100000000000000000000000000").sub(1000) ) return cb("balanceOf(\"%s\") != 100000000 * 10 ** 18 - 1000".replace("%s", accounts[0]), null);
+            if ( !r.eq(Web3.prototype.toBigNumber("100000000000000000000000000").sub(1000)) ) return cb("balanceOf(\"%s\") != 100000000 * 10 ** 18 - 1000".replace("%s", accounts[0]), null);
             contract.balanceOf.call(accounts[0], function (e, r){
                 console.log(r.toNumber(), 1000);
                 if (e) return cb("contract.balanceOf.call", null);
-                if ( r != 1000 ) return cb("balanceOf(\"%s\") != 1000".replace("%s", accounts[1]), null);
+                if ( !r.eq(Web3.prototype.toBigNumber("1000")) ) return cb("balanceOf(\"%s\") != 1000".replace("%s", accounts[1]), null);
                 return cb(undefined, null);
             });
         });
@@ -89,8 +87,15 @@ function test_transfer_from(contract, accounts, cb){
 }
 
 function test_withdraw_workflow(contract, accounts, cb){
-
-    cb("未实现", null);
+    contract.approve.call(accounts[1], 1000, {'from': accounts[0]}, function (e, r){
+        if (e) return cb("contract.approve.call", null);
+        if (r != true) return cb("approve() != true", null);
+        contract.transferFrom.call(accounts[0], accounts[2], 1000, {'from': accounts[1]}, function (e, r){
+            if (e) return cb("contract.transferFrom.call", null);
+            if (r!=true) return cb("transferFrom() != true", null);
+            cb(undefined, null);
+        });
+    });
 }
 
 function render_fn_name (name, max_len){
@@ -106,7 +111,7 @@ Test(web3.eth.contract(CONTRACT_ABI_ARRAY), function (contract, accounts){
     assert(accounts.length == 10);
     assert(accounts.filter(function (_account, _idx){return !_account }).length == 0);
 
-    let fns = [test_init, test_transfer_from, test_withdraw_workflow];
+    let fns = [test_init, test_transfer, test_transfer_from, test_withdraw_workflow];
     
     let max_fn_name_len = fns.map(function (fn){return fn.name.length}).reduce(function (a, b){
                                 return Math.max(a, b)}, 0);
