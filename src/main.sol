@@ -85,9 +85,14 @@ contract PrimasToken is ERC20Token {
         
         m_allowance[_from][msg.sender] -= _value;
         
-        return doTransfer(_from, _to, _value);
+        if ( !(doTransfer(_from, _to, _value)) ) {
+            m_allowance[_from][msg.sender] += _value;
+            revert();
+        } else {
+            return true;
+        }
     }
-
+    
     function doTransfer(address _from, address _to, uint _value) internal returns (bool success) {
         if (balance[_from] >= _value && balance[_to] + _value >= balance[_to]) {
             balance[_from] -= _value;
